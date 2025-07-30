@@ -12,7 +12,7 @@ local lsp_attach = function(client, bufnr)
   vim.keymap.set('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
   vim.keymap.set('n', 'go', '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
   vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
-  vim.keymap.set('n', 'gs', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
+  vim.keymap.set('i', '<Tab>', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
   vim.keymap.set('n', '<F2>', '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
   vim.keymap.set({'n', 'x'}, '<F3>', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
   vim.keymap.set('n', '<F4>', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
@@ -24,15 +24,34 @@ lsp_zero.extend_lspconfig({
   capabilities = require('cmp_nvim_lsp').default_capabilities(),
 })
 
+
+ -- use 'ray-x/lsp_signature.nvim'
+local sigf_lsp = require('lsp_signature')
+local sigf_opts = {
+  bind = true,
+  doc_lines = 5,
+  floating_window = true,
+  hint_enable = false,
+  handler_opts = {border = "single"},
+  extra_trigger_chars = {"(", ","},
+}
+
+sigf_lsp.setup(sigf_opts)
+
 require('mason').setup({})
+require('cmp').setup {
+  sources = {
+    { name = 'nvim_lsp_signature_help' }
+  }
+}
 require('mason-lspconfig').setup({
   -- Replace the language servers listed here 
   -- with the ones you want to install
 
-  -- ensure_installed = {'lua_ls', 'rust_analyzer', 'clangd', 'cmake', 'tsserver', 'eslint'},
+  ensure_installed = {'lua_ls', 'rust_analyzer', 'clangd', 'cmake', 'eslint'},
   --
   
- -- ensure_installed = {'lua_ls', 'cmake'},
+  --  ensure_installed = {'lua_ls', 'cmake', 'ts_ls', 'jdtls', 'eslint'},
   
 
   handlers = {
@@ -43,16 +62,17 @@ require('mason-lspconfig').setup({
 })
 
 
--- These are just examples. Replace them with the language
+-- Replace them with the language
 -- servers you have installed in your system
-require('lspconfig').tsserver.setup({})
-require('lspconfig').clangd.setup({})
-require('lspconfig').neocmake.setup({})
+require('lspconfig').ts_ls.setup({})
+require('lspconfig').jdtls.setup({})
+require('lspconfig').cmake.setup({})
 require('lspconfig').lua_ls.setup({})
+require('lspconfig').clangd.setup({})
 
 ---
 -- Autocompletion setup
----
+--
 local cmp = require('cmp')
 
 cmp.setup({
@@ -65,5 +85,10 @@ cmp.setup({
       vim.snippet.expand(args.body)
     end,
   },
-  mapping = cmp.mapping.preset.insert({}),
+  mapping = cmp.mapping.preset.insert({
+    ['<Tab>'] = cmp.mapping.select_next_item(),
+    ['<S-Tab>'] = cmp.mapping.select_prev_item(),
+    ['<CR>'] = cmp.mapping.confirm({select = true}),
+
+  }),
 })		

@@ -7,9 +7,13 @@ require('rose-pine').setup({
 	styles = {
 		bold = true,
 		italic = false,
-		transparency = false,
+		transparency = true,
+	},
+	highlight_groups = {
+
+		Normal = { bg = "none" },
+		NormalFloat = { bg = "none" }
 	}
 })
 
 colormypencil()
-
